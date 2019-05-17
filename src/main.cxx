@@ -40,7 +40,7 @@ static void initpid(void) {
 
 /* runxsrc -- run the user's profile, if it exists */
 static void runxsrc(int xsin) {
-	const char *fmt = xsin ? "%L/.xsin" : "%L/.xsrc";
+	const char *fmt = xsin ? "%L/.trashin" : "%L/.trashrc";
 	char *xsrc = str(fmt, varlookup("home", NULL), "\001");
 	int fd = eopen(xsrc, oOpen);
 	if (fd != -1) {
@@ -64,7 +64,7 @@ static void runxsrc(int xsin) {
 static void usage(void) NORETURN;
 static void usage(void) {
 	eprint(
-"usage: xs [-c command] [-silevxnpo] [file [args ...]]\n"
+"usage: trash [-c command] [-silevxnpo] [file [args ...]]\n"
 "	-c cmd	execute argument\n"
 "	-s	read commands from standard input; stop option parsing\n"
 "	-i	interactive shell\n"
