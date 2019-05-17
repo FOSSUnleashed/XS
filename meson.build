@@ -48,7 +48,7 @@ project('xs', ['cpp'])
 		'src/tree.cxx', 'src/util.cxx', 'src/var.cxx',
 		'src/version.cxx']
   common_dependencies = [boost_dep, readline_lib, gc_lib, ffi_lib]
-  xsdump = executable('xsdump', ['src/dump.cxx', common_sources],
+  xsdump = executable('trashdump', ['src/dump.cxx', common_sources],
 	cpp_args: compile_flags,
 	dependencies: common_dependencies)
   initial_cxx = custom_target('initial.cxx',
@@ -56,22 +56,22 @@ project('xs', ['cpp'])
 	output: 'initial.cxx',
 	depends: xsdump,
 	command: ['../generators/initial.sh', '@INPUT@', '@OUTPUT@'])
-  xs = executable('xs', [initial_cxx, common_sources],
+  xs = executable('trash', [initial_cxx, common_sources],
 	cpp_args: compile_flags,
 	link_args: link_flags,
 	dependencies: common_dependencies,
 	install: true)
-  install_man(['man/xs.1'])
+  install_man(['man/trash.1'])
   install_data(['doc/ANCESTORS', 'doc/CHANGES', 'doc/COPYING', 'EXAMPLES',
 		'INSTALL', 'doc/PHILOSOPHY', 'doc/PROJECTS', 'README',
 		'doc/SYSTEMD_LOCALE', 'doc/TODO', 'doc/TUTORIAL.md',
 		'doc/XS-FOR-LISPERS.md'],
-	install_dir: 'share/doc/xs')
+	install_dir: 'share/doc/trash')
 
 run_target('check',
-	command: ['./build/xs', '-c', './tests/xs_tests.xs'],
+	command: ['./build/trash', '-c', './tests/xs_tests.xs'],
 	depends: xs)
 
 run_target('fuzz',
-	command: ['./build/xs', '-c', './tests/fuzz.xs'],
+	command: ['./build/trash', '-c', './tests/fuzz.xs'],
 	depends: xs)
