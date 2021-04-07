@@ -58,21 +58,18 @@
 
 fn-.		= $&dot
 fn-access	= $&access
-fn-catch	= $&catch
 fn-echo		= $&echo
 fn-exec		= $&exec
 fn-forever	= $&forever
 fn-fork		= $&fork
 fn-newpgrp	= $&newpgrp
+fn-pause	= $&pause
+fn-read		= $&read
 fn-result	= $&result
+fn-sleep	= $&sleep
 fn-throw	= $&throw
 fn-umask	= $&umask
 fn-wait		= $&wait
-
-fn-read	= $&read
-
-
-
 
 #	eval runs its arguments by turning them into a code fragment
 #	(in string form) and running that fragment.
@@ -347,6 +344,42 @@ fn-vars = { |*|
 				}
 			}
 		}
+	}
+}
+
+#
+# Exceptions support
+#
+
+fn-catch = {|catcher body|
+	$&catch {|e|
+		if {~ $e(1) signal} {
+			throw $e
+		} else {
+			$catcher $e
+		}
+	} {
+		$body
+	}
+}
+
+fn-signals-case = {|body handler-alist|
+	$&catch {|e|
+		if {~ $e(1) signal} {
+			switch $e(2) $handler-alist {throw $e}
+		} else {
+			throw $e
+		}
+	} {
+		$body
+	}
+}
+
+fn-raise = {|signal|
+	if {~ $signal ()} {
+		throw error 'usage: raise signal'
+	} else {
+		throw signal $signal
 	}
 }
 
@@ -759,18 +792,18 @@ fn-%is-login       = $&islogin
 
 fn %interactive-loop { escape { |fn-return|
 	let (result = <=true) {
-		catch { |e type msg|
+		$&catch { |e type msg|
                 	(switch $e  
 				eof {echo exit; return $result}
 				exit {throw $e $type $msg} 
-				error { echo >[1=2] $type^: $msg
-					$fn-%dispatch false } 
+				error {echo >[1=2] $type^: $msg; \
+							result = <=false }
 				signal { if {!~ $type sigint sigterm sigquit} {
 						echo >[1=2] 'caught unexpected'\
 							^' signal:' $type
-				         }
+					}
 					if {~ $type sigint} {result = <=true}
-                                }
+				}
 				{ echo >[1=2] 'uncaught exception:' \
 					$e $type $msg })
 			throw retry # restart forever loop

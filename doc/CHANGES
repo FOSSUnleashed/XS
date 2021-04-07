@@ -1,3 +1,54 @@
+xs 1.2 to xs 1.3
+----------------
+
+Added a `sleep` builtin based upon a new `$&sleep` primitive.
+
+Added a `$&getc` primitive.
+
+Added a `$&tctl` primitive.
+
+Throwing an error causes the evaluation's result to be false.
+
+Improved readline(3) integration: Filenames containing XS special characters
+are now properly quoted by readline completion. Expand ~ in filename only at
+beginning of name. Expand ~user.
+
+Exposed signals via the new `signals-case` command, built upon `$&catch`.
+
+Allow raising a signal via the new `raise` command.
+
+Changed `$&catch` to check for unprocessed signals after executing body.
+
+Implemented `%catch` as the internal form of `catch`.
+
+Added a `pause` builtin based upon a new `$&pause` primitive.
+
+Note that the changes around signal handling represents an incompatible
+change to previously-undocumented behavior. If you reverse-engineered signal
+handling and made it work for your application, my apologies. (I'm pretty
+confident that someone who had tried this should have complained about the
+untenable use-cases of the initial signals interface.)
+
+The `$&fork` primitive sets $pid to the forked shell's own PID rather than
+that of the parent shell.
+
+The `$&fork` primitive sets $signals to (). Assignment of a valid list to
+the signals variable from a forked command has no effect.
+
+The `$&fork` primitive adjusts $SHLVL.
+
+Added a `$&build` primitive to report builder info (user, host, date, compiler).
+
+Provided an XS language-definition file for GNU source-highlight. See the
+comments at the top of `xs.lang` for installation instructions.
+
+Exposed the command-line options `-h` to show usage information and `-G` to
+run XS with the garbage collector disabled.
+
+Added the command-line option `-V` to show version and build information.
+
+Added the command-line option `-Z` to suppress loading of ~/.xsrc and ~/.xsin.
+
 xs 1.1 to xs 1.2
 ----------------
 
@@ -44,6 +95,14 @@ Fix mis-marking of a control character in a prompt. The symptom of this
 failure was corruption of the readline display during editing and recall
 when the prompt contains a control character like ^N or ^O (alternate
 character set selection on an ANSI-compatible terminal).
+
+Advertise "xs" name to readline for use in ~/.inputrc as `$if xs`.
+
+Multiple instances started within the same second now have distinct
+sequences of $&random values.
+
+Failure to lexically scan a literal integer or floating point number in
+an arithmetic expression no longer terminates the shell.
 
 xs 1.0 to xs 1.1
 ----------------

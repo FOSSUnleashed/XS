@@ -615,7 +615,7 @@ satisfy `xs`'s all-one-line requirement by using a program fragment to
 span lines, such as:
 
 ```
-if ~ $TERM linux {
+if {~ $TERM linux} {
     echo 'I''m in the console.'
 } else {
     echo 'Maybe I''m on a pty...'
@@ -734,7 +734,30 @@ exit [<status>]
 ```
 
 Most shells provide a mechanism to execute a command upon receipt of
-a signal. `xs` integrates signal handling into an exception framework
+a signal. `xs` does as well; additionally allowing for different handlers
+to be present at different places in the call stack.
+
+```
+signals-case <body> <handlers-alist>
+```
+
+The `signals-case` command executes its body with signal handlers bound
+according to a list of `<signal-name> <fragment>` pairs. The `<signal-name>`
+is from `signals.h`, but spelled using all lowercase letters. The `<fragment>`
+executes when its matching signal arrives during execution of `signals-case`.
+
+An `xs` script can use the `raise` command to raise one of its own
+`signals-case` handlers.
+
+```
+raise <signal>
+```
+
+The `<signal>` argument is either a Linux signal name as defined above or
+another name appearing in the `<handlers-alist>` of an active `signals-case`
+command.
+
+In addition to the signal handlers, `xs` provides an exception framework
 reminiscent of higher-level languages.
 
 ```
@@ -760,6 +783,9 @@ error <source> <message>
 exit <status>
 signal <name>
 ```
+
+(Note: `catch` does not handle the `signal` exception, but the primitive
+`$&catch` does. Take a look at the definitions of `catch` and `signals-case`.)
 
 You can `throw` any of these exceptions. You can also define your own:
 

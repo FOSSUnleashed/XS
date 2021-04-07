@@ -12,6 +12,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <math.h>
+
 PRIM(newpgrp) {
 	(void)binding;
 	(void)evalflags;
@@ -50,8 +52,16 @@ PRIM(fork) {
 	(void)binding;
 	int pid, status;
 	pid = efork(true, false);
-	if (pid == 0)
+	if (pid == 0) {
+		int cpid = getpid();
+		vardef("pid", NULL, mklist(mkstr(str("%d", cpid)), NULL));
+		vardef("signals", NULL, NULL);
+		List* shlvl = varlookup("SHLVL", NULL);
+		const char *lvl = getstr(shlvl->term);
+		shlvl = mklist(mkstr(str("%d", atoi(lvl)+1)), NULL);
+		vardef("SHLVL", NULL, shlvl);
 		exit(exitstatus(eval(list, NULL, evalflags | eval_inchild)));
+	}
 	status = ewaitfor(pid);
 	SIGCHK();
 	printstatus(0, status);
@@ -97,7 +107,7 @@ PRIM(cd) {
 		fail("$&cd", "usage: $&cd directory");
 	const char *dir = getstr(list->term);
 	if (chdir(dir) == -1)
-		fail("$&cd", "%s: %s", dir, esstrerror(errno));
+		fail("$&cd", "%s: %s", dir, xsstrerror(errno));
 	return ltrue;
 }
 
@@ -125,7 +135,7 @@ PRIM(setsignals) {
 	blocksignals();
 	setsigeffects(effects);
 	unblocksignals();
-	return mksiglist();
+	return hasforked ? NULL : mksiglist();
 }
 
 /*
@@ -277,7 +287,7 @@ PRIM(limit) {
 			else
 				rlim.rlim_cur = n;
 			if (setrlimit(lim->flag, &rlim) == -1)
-				fail("$&limit", "%s", esstrerror(errno));
+				fail("$&limit", "%s", xsstrerror(errno));
 		}
 	}
 	return ltrue;
@@ -314,6 +324,37 @@ PRIM(time) {
 	return mklist(mkstr(mkstatus(status)), NULL);
 }
 
+PRIM(sleep) {
+	(void)binding;
+	(void)evalflags;
+	if (list == NULL || list->next != NULL)
+		fail("$&sleep", "usage: $&sleep seconds");
+	const char *arg = getstr(list->term);
+	char *end;
+	double time = strtod(arg, &end);
+	if (arg == end || *end != '\0')
+		fail("$&sleep", "usage: $&sleep seconds");
+	double whole;
+	double frac = modf(time, &whole);
+	struct timespec ts;
+	ts.tv_sec = whole;
+	ts.tv_nsec = frac * 1000000000;
+	int rc;
+	do {
+		rc = nanosleep(&ts, &ts);
+	} while (rc == EINTR);
+	return ltrue;
+}
+
+PRIM(pause) {
+	(void)binding;
+	(void)evalflags;
+	if (list != NULL)
+		fail("$&pause", "usage: $&pause");
+	pause();
+	return ltrue;
+}
+
 extern void initprims_sys(Prim_dict& primdict) {
 	X(newpgrp);
 	X(background);
@@ -324,4 +365,6 @@ extern void initprims_sys(Prim_dict& primdict) {
 	X(setsignals);
 	X(limit);
 	X(time);
+	X(sleep);
+	X(pause);
 }

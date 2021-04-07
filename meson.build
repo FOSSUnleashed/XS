@@ -2,18 +2,30 @@ project('xs', ['cpp'])
   compiler = meson.get_compiler('cpp')
   compile_flags = ['-I../src', '-Wall', '-Wextra']
   link_flags = []
-  boost_dep = dependency('boost')
-  ffi_lib = dependency('libffi', required: false)
+  boost_dep = dependency('boost', version: '>=1.60')
+  ffi_lib = dependency('ffi', version: '>=6.0.2', required: false)
   if not ffi_lib.found()
     ffi_lib = compiler.find_library('ffi')
   endif
-  gc_lib = compiler.find_library('gc')
-  readline_lib = compiler.find_library('readline')
+  gc_lib = dependency('gc', version: '>=1.0.3', required: false)
+  if not gc_lib.found()
+    gc_lib = compiler.find_library('gc')
+  endif
+  gccpp_lib = compiler.find_library('gccpp')
+  readline_lib = dependency('readline', version: '>=6.3', required: false)
+  if not readline_lib.found()
+    readline_lib = compiler.find_library('readline')
+  endif
   custom_target('.stamp',
 	build_always_stale: true,
 	build_by_default: true,
 	output: '.stamp',
 	command: ['touch', '@OUTPUT@'])
+  custom_target('buildinfo.hxx',
+	build_always_stale: true,
+	build_by_default: true,
+	output: 'buildinfo.hxx',
+	command: ['../generators/buildinfo.sh'])
   custom_target('git_date.hxx',
 	build_always_stale: true,
 	build_by_default: true,
@@ -31,8 +43,9 @@ project('xs', ['cpp'])
 	command: ['../generators/git_url.sh'])
   parse_cxx = custom_target('parse.cxx',
 	depend_files: 'src/parse.yxx',
-	output: ['parse.cxx', 'parse.hxx'],
-	command: ['../generators/mkparse.sh'])
+	input: ['src/parse.yxx'],
+	output: ['parse.tab.cxx', 'parse.tab.hxx'],
+	command: ['bison', '-d', '@INPUT@'])
   sigmsgs_cxx = custom_target('sigmsgs.cxx',
 	output: 'sigmsgs.cxx',
 	command: ['../generators/mksignal.sh', '@OUTPUT@'])
@@ -46,8 +59,8 @@ project('xs', ['cpp'])
 		'src/split.cxx', 'src/status.cxx', 'src/str.cxx',
 		'src/syntax.cxx', 'src/term.cxx', 'src/token.cxx',
 		'src/tree.cxx', 'src/util.cxx', 'src/var.cxx',
-		'src/version.cxx']
-  common_dependencies = [boost_dep, readline_lib, gc_lib, ffi_lib]
+		'src/version.cxx', 'src/buildinfo.cxx']
+  common_dependencies = [boost_dep, readline_lib, gc_lib, ffi_lib, gccpp_lib]
   xsdump = executable('trashdump', ['src/dump.cxx', common_sources],
 	cpp_args: compile_flags,
 	dependencies: common_dependencies)
@@ -62,10 +75,10 @@ project('xs', ['cpp'])
 	dependencies: common_dependencies,
 	install: true)
   install_man(['man/trash.1'])
-  install_data(['doc/ANCESTORS', 'doc/CHANGES', 'doc/COPYING', 'EXAMPLES',
-		'INSTALL', 'doc/PHILOSOPHY', 'doc/PROJECTS', 'README',
+  install_data(['doc/ANCESTORS', 'doc/CHANGES', 'doc/COPYING',
+		'INSTALL', 'doc/PHILOSOPHY', 'doc/PROJECTS', 'README.md',
 		'doc/SYSTEMD_LOCALE', 'doc/TODO', 'doc/TUTORIAL.md',
-		'doc/XS-FOR-LISPERS.md'],
+		'doc/XS-FOR-LISPERS.md', 'xs.lang'],
 	install_dir: 'share/doc/trash')
 
 run_target('check',

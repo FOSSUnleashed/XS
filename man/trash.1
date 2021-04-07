@@ -1,9 +1,14 @@
-.TH XS 1 "2018 - v1.2"
+.\" Font usage:
+.\"   \fR descriptive; man page (section)
+.\"   \fB literal text; section refs; man page name
+.\"   \fI meta
+.
+.TH XS 1 "2020 - v1.3"
 .SH NAME
 xs \- extensible shell
 .SH SYNOPSIS
-.BR xs " [" -silevxnpod ]
-.RB [ -c " \fIFRAGMENT\fP | "\fISCRIPT " [" \fIARGUMENTS ]]
+.BR xs " [" -silevxnpod?G ]
+.RB [ -c " \fIFRAGMENT\fR | "\fISCRIPT " [" \fIARGUMENTS ]]
 .SH DESCRIPTION
 .B Xs
 is a command interpreter for Linux.
@@ -12,7 +17,8 @@ allows programming in a functional style and has a simple, consistent syntax.
 .PP
 .B Xs
 provides hooks to customize many of its internal operations, including
-primitives for exception handling and lexical and dynamic control flow.
+primitives for signal and exception handling and lexical and dynamic
+control flow.
 .PP
 A significant portion of
 .B xs
@@ -27,6 +33,9 @@ the three implementations are not interoperable.
 .TS
 tab(@);
 lb lx .
+-h@T{
+Show usage information.
+T}
 -s@T{
 Read commands from standard input; pass the first argument to
 .B xs
@@ -74,6 +83,18 @@ Execute the
 .BR "Program fragments" ,
 below.)
 T}
+-G@T{
+Run without garbage collection.
+T}
+-Z@T{
+Suppress loading of
+.I ~/.xsrc
+and
+.IR ~/.xsin .
+T}
+-V@T{
+Display version and build information.
+T}
 .TE
 .SH LANGUAGE
 Lexically, an
@@ -96,9 +117,9 @@ The empty word is denoted by
 .PP
 Words are indivisible and immutable.
 .SS Escapes
-A special character may escaped by preceeding it with a backslash
-.RB ( \e );
-this defeats the character's special meaning, allowing the character
+A special character may be escaped by preceeding it with a backslash
+.RB ( \e ).
+This defeats the character's special meaning, allowing the character
 to be (part of) a word.
 .PP
 Other escapes denote control characters:
@@ -298,7 +319,7 @@ may be part of a variable name.
 Variable names having the prefix
 .B fn-
 or
-.B var-
+.B set-
 have special meaning; see
 .BR Functions " and " Settors ,
 respectively.
@@ -337,7 +358,7 @@ before its name, like
 .BI $ var
 .RI .
 Indirection (multiple
-.BR $\fP)
+.BR $\fR)
 is allowed.
 .PP
 An undefined variable yields the empty list when referenced.
@@ -359,8 +380,7 @@ A subscript greater than the number of list elements yields the empty list.
 .RS
 .TP
 .B a = w x y z; echo $a(2 3 4 4 3)
-prints
-.BR "x y z z y" " ."
+prints "x y z z y".
 .RE
 .PP
 Subscripts may be specified as ranges by separating the range endpoints with
@@ -514,7 +534,7 @@ a numeric value.
 Numbers may be integer or floating-point; the latter are stored with limited
 precision (usually six significant digits).
 .PP
-Integer overflow does not signal an exception.
+Integer overflow does not throw an exception.
 .PP
 If an expression involves any floating-point value, the result will be
 floating-point.
@@ -1041,18 +1061,18 @@ The catcher may handle the exception, retry the code which caused
 the exception or throw the exception to the next catcher.
 .PP
 An exception is a list.
-The first word denotes the exception type, one of:
+The first word denotes the exception kind, one of:
 .PP
 .RS
 .TP
 .B eof
-Raised by the
+Thrown by the
 .B xs
 parser at end of input.
 .TP
 .B error
 The following words are the source (typically a descriptive name
-such as the name of the function which signalled the error) and a message.
+such as the name of the function which threw the error) and a message.
 .B xs
 provides a last-resort catcher to print the message.
 .TP
@@ -1063,7 +1083,7 @@ This exception, when caught by
 exits the shell with the given return code.
 .TP
 .B retry
-When raised by a catcher, this causes the body of the
+When thrown by a catcher, this causes the body of the
 .B catch
 form to run again.
 Note that the catcher must have done something to clear
@@ -1083,6 +1103,100 @@ form executes its body in the context of a catcher:
 The
 .IR catcher " and " body
 are fragments.
+.SS Signals
+.B Xs
+processes signals internally as needed for interactive operation.
+For example, SIGINT is used to kill any foreground process and,
+during input, to present a fresh prompt.
+.PP
+.B Xs
+can expose signals for handling by a script.
+Signal handlers are established by the
+.B signals-case
+command.
+.PP
+.RS
+.BI signals-case " body handlers-alist" " \fR,"
+.RE
+.PP
+where
+.I body
+is a fragment
+and
+.I handlers-alist
+is a list of
+.IR "signal-name fragment" .
+The
+.I signal-name
+is spelled as in
+.BR signal.h (0p),
+but using lowercase letters, e.g.
+.IR sigint " and " sigterm .
+.PP
+The
+.B pause
+command suspends execution until
+.B xs
+receives a signal.
+.PP
+The
+.B signals
+variable (see
+.BR "BUILTIN VARIABLES" ,
+below) indicates which signals are accepted by
+.B xs
+and how they are processed.
+Setting
+.B signals
+to a new list of handler specifications establishes signal handlers
+per the list.
+A signal must be listed on
+.B signals
+(and not disabled) in order to be handled by
+.BR signals-case .
+.PP
+A signal not handled by a
+.B signals-case
+is propagated to the next
+.B signals-case
+handler (if any) up the call chain; a last-resort handler reports
+an unhandled signal.
+.PP
+In this example, note that the signal is not intercepted by the
+exception handler established by
+.BR catch .
+The code prints "sigttou".
+.PP
+.RS
+.EX
+signals = $signals sigttou
+signals-case {
+    catch {|e| echo catch $e} {kill -sigttou $pid}
+} (sigttou {echo sigttou})
+.EE
+.RE
+.PP
+A script may signal its own handler using the
+.RS
+.PP
+.BI raise " signal"
+.PP
+.RE
+command.
+The
+.I signal
+may be either a signal name as defined above or a name which appears in the
+.I handlers-alist
+of an active
+.B signals-case
+command.
+.PP
+Signals are never processed within a
+.BI "fork {" ... }
+command.
+(This applies only to actual signals and not to the effect of the
+.B raise
+command.)
 .SS Upward funargs
 An "upward funarg" is a function returned from another function.
 Because a returned function may be executed in a different lexical
@@ -1200,10 +1314,22 @@ plus any signals ignored (/) when
 .B xs
 started.
 .B xs
-recognizes that
-.BR sigxcpu " and " sigpwr
-are used by its garbage collector and intentionally ignores them to avoid disrupting
-the collector's operation.
+recognizes that sigxcpu and sigpwr are used by its garbage collector and
+intentionally ignores them to avoid disrupting the collector's operation.
+.PP
+When
+.B $signals
+is written, its value is used by the
+.B set-signals
+settor to configure the shell's signal handlers.
+.PP
+Inside a
+.BI "fork {" ... }
+command,
+.B $signals
+is always empty; assigning a valid list to
+.B signals
+has no effect.
 .RE
 .PP
 .B Xs
@@ -1353,14 +1479,14 @@ Lexical bindings are not available to
 .BR eval .
 The following code prints "dyn":
 .PP
-.ft CR
 .RS
+.EX
  x = dyn
  let (x = lex) {
      eval 'echo $x'
  }
+.EE
 .RE
-.ft
 .RE
 .TP
 .BI exec " cmd"
@@ -1386,6 +1512,10 @@ is not given.
 Identical to
 .BR "result 1" .
 .TP
+.BI fn " name fragment"
+See
+.BR Functions .
+.TP
 .BI for " vars-and-values... fragment"
 See
 .BR Loops .
@@ -1398,6 +1528,8 @@ See
 Run
 .I command
 in a subshell.
+Signals are not processed during execution of
+.IR command .
 .TP
 .BR history " [" \fI# | -c | "-d \fI#" | -n | -y ]
 Without arguments, show command history.
@@ -1421,6 +1553,10 @@ See
 .TP
 .B jobs
 List background jobs.
+.TP
+.BI let " bindings fragment"
+See
+.BR "Lexical Variables" .
 .TP
 .BR limit " [" -h "] [" \fIresource " [" \fIvalue ]]
 Display or alter process resource limits.
@@ -1446,6 +1582,10 @@ Numbers representing time allow the suffixes
 (hours) as well as durations like
 .IR hh : mm : "ss and mm" : ss.
 .TP
+.BI local " bindings fragment"
+See
+.BR "Local Variables" .
+.TP
 .BI map " action list"
 Apply
 .I action
@@ -1458,6 +1598,10 @@ result.
 .BI omap " action list"
 Like map, but collect a list of the outputs of
 .IR action .
+.TP
+.B pause
+Suspend execution until a signal is received. See
+.BR Signals .
 .TP
 .B popd
 Pop the directory stack to set the working directory, and print the new
@@ -1492,6 +1636,13 @@ If
 is omitted and the stack is at least two deep, then alternate between
 the two top directories.
 .TP
+.BI raise " signal"
+Raise a signal to be handled by a
+.B signals-case
+command which is active on the call stack.
+See
+.BR Signals .
+.TP
 .B read
 Read from standard input and return a single word containing a line of
 text (without the newline).
@@ -1502,6 +1653,16 @@ upon end-of-file.
 .BI result " value..."
 Return
 .IR value s.
+.TP
+.BI signals-case " fragment handlers_alist"
+See
+.BR Signals .
+.TP
+.BI sleep " seconds"
+Sleep for
+.IR seconds .
+Fractional times are allowed.
+Negative times are treated as zero.
 .TP
 .BR switch " \fIvalue [" "\fIcase \fIaction" "]... [" \fIdefault-action ]
 See
@@ -1849,7 +2010,8 @@ $&apids@%apids
 $&background@\fIused by \fR%background
 $&backquote@\fIused by \fR%backquote
 $&batchloop@%batch-loop
-$&catch@catch
+$&build@\fIbuild info
+$&catch@\fIused by \fRcatch \fIand \fRsignals-case
 $&cd@\fIused by \fRcd
 $&close@%close
 $&cmp@%cmp
@@ -1876,20 +2038,24 @@ $&newfd@%newfd
 $&newpgrp@newpgrp
 $&openfile@%openfile
 $&parse@%parse
+$&pause@pause
 $&pipe@%pipe
 $&primitives@\fIlist xs primitives
 $&printf@printf
 $&random@\fIrandom integer
 $&read@%read
 $&readfrom@%readfrom
+$&getc@\fIread one character
+$&tctl@\fIset terminal control (cooked, raw, echo, noecho)
 $&resetterminal@\fIused to keep readline(3) in sync with terminal
 $&result@result
 $&run@%run
 $&seq@%seq
-$&sethistory@set-history
-$&setmaxevaldepth@set-max-eval-depth
-$&setnoexport@set-noexport
-$&setsignals@set-signals
+$&sethistory@\fIsettor implementing \fRset-history
+$&setmaxevaldepth@\fIsettor implementing \fRset-max-eval-depth
+$&setnoexport@\fIsettor implementing \fRset-noexport
+$&setsignals@\fIsettor implementing \fRset-signals
+$&sleep@sleep
 $&split@%split
 $&throw@throw
 $&time@time
@@ -1975,7 +2141,7 @@ Return a fragment suitable for execution.
 Raise an
 .B eof
 exception at end of input.
-.P
+.TP
 .B %prompt
 .B Xs
 calls this hook immediately before
@@ -2101,15 +2267,46 @@ T}
 {~ {%cmp \fIa\fR \fIb\fR} -1 1}
 T}
 .TE
+.SH ENVIRONMENT
+.B Xs
+reads the following environment variables.
+.TS
+tab(@);
+lb lb lb
+l l l .
+Variable@Default@Usage
+HOME@/@define ~
+PATH@/usr/bin:/bin:@locate executables
+.TE
+.PP
+.B Xs
+sets the following environment variables.
+.TS
+tab(@);
+lb lb
+l l .
+Variable@Usage
+SHLVL@track shell nesting level
+.TE
 .SH EDITING
 Input editing is provided by
 .BR readline (3)
 and configured by
 .BR ~/.inputrc .
+The
+.BR ~/.inputrc
+file may contain definitions specifically for
+.BR xs ,
+and not other
+.BR readline "(3)-aware programs,"
+through use of the conditional construct
+.IR "$if xs" .
 .SH FILES
 These files are read and interpreted when
 .B xs
-starts:
+starts without the
+.B -Z
+option:
 .RS
 .TP
 .B ~/.xsrc
@@ -2129,7 +2326,7 @@ are read,
 .B ~/.xsrc
 is read first.
 .SH SEE ALSO
-Additional documentation and sample code is installed in
+Additional documentation is installed in
 .IB prefix /share/doc/xs
 .RI .
 .I Prefix

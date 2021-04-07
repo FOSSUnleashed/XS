@@ -309,7 +309,7 @@ extern Vector* vectorize(const List* list);
 
 /* util.cxx */
 
-extern const char *esstrerror(int err);
+extern const char *xsstrerror(int err);
 extern void uerror(const char *msg);
 extern void *ealloc(size_t n);
 extern void *erealloc(void *p, size_t n);
@@ -353,10 +353,10 @@ extern bool resetterminal;
 
 /* opt.cxx */
 
-extern void esoptbegin(List *list, const char *caller, const char *usage);
-extern int esopt(const char *options);
-extern Term *esoptarg(void);
-extern List *esoptend(void);
+extern void xsoptbegin(List *list, const char *caller, const char *usage);
+extern int xsopt(const char *options);
+extern Term *xsoptarg(void);
+extern List *xsoptend(void);
 
 
 /* prim.cxx */
@@ -410,9 +410,16 @@ extern int eopen(const char *name, OpenKind k);
 
 extern const char * const version;
 
+/* buildinfo.cxx */
 
+extern const char * const build;
+
+/* util.cxx */
 
 extern void fail(const char *from, const char *name, ...) NORETURN;
+
+/* ... */
+
 inline void print_exception(List *e) {
 	eprint("%L\n", e, " ");
 }

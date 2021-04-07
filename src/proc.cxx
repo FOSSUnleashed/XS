@@ -1,12 +1,9 @@
 /* proc.cxx -- process control system calls */
 
 #include "xs.hxx"
+#include "prim.hxx"
 #include <list>
 using std::list;
-
-/* TODO: the rusage code for the time builtin really needs to be cleaned up */
-
-#include <sys/time.h>
 #include <sys/resource.h>
 
 bool hasforked = false;
@@ -42,7 +39,7 @@ extern int efork(bool parent, bool background) {
 			hasforked = true;
 			break;
 		case -1:
-			fail("xs:efork", "fork: %s", esstrerror(errno));
+			fail("xs:efork", "fork: %s", xsstrerror(errno));
 		}
 	}
 	closefds();
@@ -96,7 +93,7 @@ top:
 						reap(deadpid, proc->status);
 					else if (errno != EINTR) {
 						fail("xs:ewait", "wait: %s",
-                                                     esstrerror(errno));
+                                                     xsstrerror(errno));
 					}
 					else if (interruptible)
 						SIGCHK();
@@ -116,7 +113,7 @@ top:
 		int status;
 		while ((pid = dowait(&status)) == -1) {
 			if (errno != EINTR) {
-				fail("xs:ewait", "wait: %s", esstrerror(errno));
+				fail("xs:ewait", "wait: %s", xsstrerror(errno));
 			}
 			if (interruptible)
 				SIGCHK();
@@ -126,8 +123,6 @@ top:
 	fail("xs:ewait", "%d is not a child of this shell", pid);
 	NOTREACHED;
 }
-
-#include "prim.hxx"
 
 PRIM(apids) {
 	(void)list;

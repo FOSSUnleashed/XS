@@ -1,9 +1,4 @@
-- Add job control (SIGTSTP, fg, bg).
-- Improve the readline experience:
-  - Make quoting during completion match what the user would type.
-  - Alter completion behavior depending upon command prefix.
-  - Repaint prompt and partial input after printing PID of terminated job.
-
-- As needed:
-  - Fix crashes found by fuzzer.
-  - Add unit tests.
+- Add job control (SIGTSTP, SIGTTIN, SIGTTOU, fg, bg).
+- Integrate into interactive toploop: print notification of terminated job.
+- Improve the fuzzer test harness.
+- Add unit tests.
