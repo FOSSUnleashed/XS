@@ -147,6 +147,9 @@ int main(int argc, char **argv) {
 	if (argv[0][0] == '-')
 		loginshell = true;
 
+	// Set optind to a known value to make the skip parsing not cause problems
+	optind = 1;
+
 	// Test to see if we should skip parsing arguments
 	if (2 < argc && (
 		('/' == argv[1][0] && '-' == argv[2][0])
