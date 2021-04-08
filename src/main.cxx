@@ -147,6 +147,11 @@ int main(int argc, char **argv) {
 	if (argv[0][0] == '-')
 		loginshell = true;
 
+	// Test to see if we should skip parsing arguments
+	if (2 < argc && (
+		('/' == argv[1][0] && '-' == argv[2][0])
+	)) { goto getopt_done; }
+
 	while ((c = getopt(argc, argv, "eilxvnpodsc:hGZV")) != EOF)
 		switch (c) {
 #define FLAG(x, action) case x: action; break; 
