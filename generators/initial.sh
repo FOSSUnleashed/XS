@@ -1,3 +1,3 @@
 #! /usr/bin/env sh
 
-./trashdump <$1 >$2
+../build/trashdump <$1 >$2
