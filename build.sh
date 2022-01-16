@@ -2,8 +2,6 @@
 
 meson_opts='-Db_lto=true --strip'
 
-make -C gen
-
 if [ "$1" = '--clang' ]; then
 	export CC=clang
 	export CXX=clang++
