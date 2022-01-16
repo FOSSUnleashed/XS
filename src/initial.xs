@@ -194,10 +194,10 @@ fn-whats = { |args|
 #	While uses to indicate that, while it is a lambda, it
 #	does not catch the return exception.
 
-fn-while = { |cond body| escape { |fn-return|
+fn-until = { |cond body| escape { |fn-return|
 	let (result = <=true)
 		forever {
-			if {!$cond} {
+			if {$cond} {
 				return $result
 			} else {
 				result = <=$body
@@ -205,8 +205,16 @@ fn-while = { |cond body| escape { |fn-return|
 		}
 }}
 
-fn-until = { |cond body|
-	while { ! $cond } $body
+fn-while = { |cond body|
+	until { ! $cond } $body
+}
+
+fn-byline = {|fn-body|
+	let (_byline_line = ()) {
+		until {_byline_line = <=read; ~ $_byline_line ()} {
+			body $_byline_line
+		}
+	}
 }
 
 fn-switch = { |value args| escape { |fn-return|
