@@ -20,17 +20,6 @@ clean:
 gen/ build/:
 	mkdir -p $@
 
-#build/trashdump: $(gen_headers) gen/sigmsgs.cxx
-#	# trashdump still needs this to build for some reason
-#	touch gen/initial.cxx
-#	# This command will fail because it will also try to build trash
-#	./build.sh || true
-#	# prevent make from thinking this is a good file
-#	rm gen/initial.cxx
-
-#build/trash: build/trashdump $(gen_headers) $(gen_source)
-#	./build.sh
-
 build/version.o : gen/git_date.hxx gen/git_hash.hxx gen/git_url.hxx
 build/buildinfo.o : gen/buildinfo.hxx
 build/input.o build/token.o build/syntax.o :  gen/parse.tab.hxx
@@ -50,8 +39,10 @@ build/trashdump: src/dump.cxx $(ALL_OBJECTS) | build/
 build/trash: gen/initial.cxx $(ALL_OBJECTS) | build/
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) $(LIBS) $^ -o $@
 
-gen/parse.tab.cxx gen/parse.tab.hxx: src/parse.yxx | gen/
+gen/parse.tab.cxx: src/parse.yxx | gen/
 	$(YACC) -d -o gen/parse.tab.cxx $<
+
+gen/parse.tab.hxx: gen/parse.tab.cxx
 
 gen/buildinfo.hxx: | gen/
 	cd gen && sh ../generators/buildinfo.sh
