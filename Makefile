@@ -7,7 +7,6 @@ CXXFLAGS ?= -Wall -Wextra
 
 INCLUDE = -Isrc -Igen
 LIBS = -lgc -lgccpp -lreadline -lffi
-GENHEADERS = gen/buildinfo.hxx gen/git_date.hxx gen/git_hash.hxx gen/git_url.hxx gen/parse.tab.hxx
 SOURCES = src/access.cxx src/closure.cxx src/conv.cxx src/eval.cxx src/fd.cxx src/glob.cxx src/glom.cxx src/heredoc.cxx src/input.cxx src/list.cxx src/main.cxx src/match.cxx src/opt.cxx src/prim-ctl.cxx src/prim.cxx src/prim-etc.cxx src/prim-io.cxx src/prim-rel.cxx src/prim-sys.cxx src/print.cxx src/proc.cxx src/signal.cxx src/split.cxx src/status.cxx src/str.cxx src/syntax.cxx src/term.cxx src/token.cxx src/tree.cxx src/util.cxx src/var.cxx src/version.cxx src/buildinfo.cxx
 OBJECTS = $(patsubst src/%.cxx,build/%.o,$(SOURCES))
 ALL_OBJECTS = $(OBJECTS) build/sigmsgs.o build/parse.o
@@ -32,7 +31,11 @@ gen/ build/:
 #build/trash: build/trashdump $(gen_headers) $(gen_source)
 #	./build.sh
 
-$(OBJECTS): build/%.o : src/%.cxx $(GENHEADERS) | build/
+build/version.o : gen/git_date.hxx gen/git_hash.hxx gen/git_url.hxx
+build/buildinfo.o : gen/buildinfo.hxx
+build/input.o build/token.o build/syntax.o :  gen/parse.tab.hxx
+
+$(OBJECTS): build/%.o : src/%.cxx | build/
 	$(CXX) -c $(CXXFLAGS) $(INCLUDE) $< -o $@
 
 build/sigmsgs.o: gen/sigmsgs.cxx | build/
