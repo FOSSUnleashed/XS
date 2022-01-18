@@ -2,7 +2,7 @@
 
 # generate xs's internal signal table from signal.h
 
-INCS=$(cpp -E /usr/include/signal.h | grep include |
+INCS=$(echo "#include <signal.h>" | cpp | grep include |
 	sed 's/^[^"]*"//' | sed 's/".*$//' | sort | uniq)
 
 exec >$1
