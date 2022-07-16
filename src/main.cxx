@@ -150,12 +150,7 @@ int main(int argc, char **argv) {
 	// Set optind to a known value to make the skip parsing not cause problems
 	optind = 1;
 
-	// Test to see if we should skip parsing arguments
-	if (1 < argc && '-' != argv[1][0]) {
-		goto getopt_done;
-	}
-
-	while ((c = getopt(argc, argv, "eilxvnpodsc:hGZV")) != EOF)
+	while ((c = getopt(argc, argv, "+eilxvnpodsc:hGZV")) != EOF)
 		switch (c) {
 #define FLAG(x, action) case x: action; break; 
 		FLAG('c', cmd = optarg);
