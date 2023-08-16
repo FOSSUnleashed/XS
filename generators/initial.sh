@@ -1,3 +1,3 @@
 #! /usr/bin/env sh
 
-../build/trashdump <$1 >$2
+../build/xsdump <$1 >$2

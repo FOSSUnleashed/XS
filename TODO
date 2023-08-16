@@ -1,1 +1,4 @@
 Add byline to the manpage
+
+Fix readline tab complete weirdness
+Remove pushd/popd needless echo

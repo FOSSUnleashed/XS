@@ -12,7 +12,7 @@ OBJECTS = $(patsubst src/%.cxx,build/%.o,$(SOURCES))
 ALL_OBJECTS = $(OBJECTS) build/sigmsgs.o build/parse.o
 
 .PHONY: clean all
-all: build/trash
+all: build/xs
 
 clean:
 	rm -rf build gen
@@ -33,10 +33,10 @@ build/sigmsgs.o: gen/sigmsgs.cxx | build/
 build/parse.o: gen/parse.tab.cxx | build/
 	$(CXX) -c $(CXXFLAGS) $(INCLUDE) $< -o $@
 
-build/trashdump: src/dump.cxx $(ALL_OBJECTS) | build/
+build/xsdump: src/dump.cxx $(ALL_OBJECTS) | build/
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) $(LIBS) $^ -o $@
 
-build/trash: gen/initial.cxx $(ALL_OBJECTS) | build/
+build/xs: gen/initial.cxx $(ALL_OBJECTS) | build/
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) $(LIBS) $^ -o $@
 
 gen/parse.tab.cxx: src/parse.yxx | gen/
@@ -59,5 +59,5 @@ gen/git_url.hxx: | gen/
 gen/sigmsgs.cxx: | gen/
 	cd gen && sh ../generators/mksignal.sh sigmsgs.cxx
 
-gen/initial.cxx: build/trashdump | gen/
+gen/initial.cxx: build/xsdump | gen/
 	cd gen && sh ../generators/initial.sh ../src/initial.xs initial.cxx

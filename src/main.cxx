@@ -40,7 +40,7 @@ static void initpid(void) {
 
 /* runxsrc -- run the user's profile, if it exists */
 static void runxsrc(int xsin) {
-	const char *fmt = xsin ? "%L/.trashin" : "%L/.trashrc";
+	const char *fmt = xsin ? "%L/.xsin" : "%L/.xsrc";
 	char *xsrc = str(fmt, varlookup("home", NULL), "\001");
 	int fd = eopen(xsrc, oOpen);
 	if (fd != -1) {
@@ -64,7 +64,7 @@ static void runxsrc(int xsin) {
 static void usage(void) NORETURN;
 static void usage(void) {
 	eprint(
-"usage: trash [-c command] [-silevxnpo?GZ] [file [args ...]]\n"
+"usage: xs [-c command] [-silevxnpo?GZ] [file [args ...]]\n"
 "	-h	show usage information; then exit\n"
 "	-c cmd	execute argument\n"
 "	-s	read commands from standard input; stop option parsing\n"
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
 	if (argc == 0) {
 		argc = 1;
 		argv = reinterpret_cast<char**>(ealloc(2 * sizeof (char *)));
-		argv[0] = strdup("trash");
+		argv[0] = strdup("xs");
 		argv[1] = NULL;
 	}
 	if (argv[0][0] == '-')
@@ -174,7 +174,7 @@ int main(int argc, char **argv) {
 
 getopt_done:
 	if (cmd_stdin && cmd != NULL) {
-		eprint("trash: -s and -c are incompatible\n");
+		eprint("xs: -s and -c are incompatible\n");
 		exit(1);
 	}
 
