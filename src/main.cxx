@@ -9,6 +9,7 @@ extern char *optarg;
 
 extern char **environ;
 
+int is_dump = 0;
 
 /* checkfd -- open /dev/null on an fd if it is closed */
 static void checkfd(int fd, OpenKind r) {

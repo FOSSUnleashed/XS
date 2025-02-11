@@ -98,7 +98,7 @@ extern Tree *mklambda(Tree *params, Tree *body) {
 	return mk(nLambda, params, body);
 }
 
-/* mkseq -- destructively add to a sequence of nList/nThink operations */
+/* mkseq -- destructively add to a sequence of nList/nThunk operations */
 extern Tree *mkseq(const char *op, Tree *t1, Tree *t2) {
 	Tree *tail;
 	bool sametail;

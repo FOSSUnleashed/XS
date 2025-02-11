@@ -272,9 +272,11 @@ static void printheader(const List *title) {
 	print("%s\n\n", PPSTRING(TreeTypes));
 }
 
-
+extern int is_dump;
 
 extern void runinitial(void) {
+	is_dump = 1;
+
 	const List *title = runfd(0, "initial.xs", 0);
 
 	printheader(title);

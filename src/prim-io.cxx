@@ -87,7 +87,7 @@ REDIR(openfile) {
 	list = list->next;
 	fd = eopen(name, kind);
 	if (fd == -1)
-		fail("$&openfile", "%s: %s", name, xsstrerror(errno));
+		fail("$&openfile", "%s: [%d] %s", name, errno, xsstrerror(errno));
 	*srcfdp = fd;
 	return list;
 }

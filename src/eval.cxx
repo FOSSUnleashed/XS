@@ -5,6 +5,27 @@
 #include <term.hxx>
 unsigned long evaldepth = 0, maxevaldepth = MAXmaxevaldepth;
 
+List safe_exit = {};
+
+static List *mksafe(List * l, bool needed) {
+	if (!needed) {
+		return l;
+	}
+
+	safe_exit.next = l;
+
+	return &safe_exit;
+}
+
+static bool wassafe(const List ** l) {
+	if (&safe_exit == *l) {
+		*l = safe_exit.next;
+		safe_exit.next = NULL;
+		return true;
+	}
+	return false;
+}
+
 static void failexec(const char* file, const List* args) NORETURN;
 static void failexec(const char* file, const List* args) {
 	List *fn;
@@ -224,6 +245,11 @@ top:
 		}
 
 		case nAssign:
+//		return mksafe(assign(tree->u[0].p, tree->u[1].p, binding), !!(flags & eval_exitonfalse)); // TODO make this work
+		if (flags & eval_exitonfalse) {
+			assign(tree->u[0].p, tree->u[1].p, binding);
+			return ltrue;
+		}
 		return assign(tree->u[0].p, tree->u[1].p, binding);
 
 		case nLet: case nClosure: {
@@ -287,6 +313,8 @@ class Depth_tracker {
 			--evaldepth;
 		}
 };
+
+extern int is_dump;
 
 /* eval -- evaluate a list, producing a list */
 extern const List *eval(const List* list, Binding* binding, int flags) {
@@ -371,8 +399,13 @@ restart:
 	goto restart;
 
 done:
-	if ((flags & eval_exitonfalse) && !istrue(list))
+	if (wassafe(&list)) {
+		flags &= ~eval_exitonfalse;
+	}
+
+	if ((flags & eval_exitonfalse) && !istrue(list)) {
 		exit(exitstatus(list));
+	}
+
 	return list;
 }
-

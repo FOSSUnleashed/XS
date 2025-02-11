@@ -141,6 +141,7 @@ extern int eopen(const char *name, OpenKind k) {
 	return open(name, mode_masks[k], 0666);
 }
 
+// strdup
 extern char *gcndup(const char* s, size_t n) {
 	char* ns = reinterpret_cast<char*>(galloc((n + 1) * sizeof (char)));
 	memcpy(ns, s, n);
