@@ -7,3 +7,8 @@ Add function that takes a list of wildcards, returns function that takes a list 
 Fix echo redirect bad file error crash
 History functions, how do they work?
 Exit on false is buggy, breaks on assignments -- Fix this properly!  Hack is in place
+Modify variable meta-data (exportable, type, etc)
+Scope/context type variables
+
+Not necessarily a TODO, but the @ command in rc is used to make a subshell.  This is slightly different than fork or %background.
+Possible idea?  Make it a co-routine operator?
