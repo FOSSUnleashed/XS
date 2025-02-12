@@ -59,5 +59,5 @@ gen/git_url.hxx: | gen/
 gen/sigmsgs.cxx: | gen/
 	cd gen && sh ../generators/mksignal.sh sigmsgs.cxx
 
-gen/initial.cxx: build/xsdump | gen/
-	cd gen && sh ../generators/initial.sh ../src/initial.xs initial.cxx
+gen/initial.cxx: src/initial.xs build/xsdump | gen/
+	./build/xsdump <$< >$@
