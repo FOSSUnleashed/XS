@@ -174,16 +174,32 @@ static const Limit limits[] = {
 	{ "datasize",		RLIMIT_DATA,	sizesuf },
 	{ "stacksize",		RLIMIT_STACK,	sizesuf },
 	{ "coredumpsize",	RLIMIT_CORE,	sizesuf },
+#ifdef RLIMIT_RSS 
 	{ "memoryuse",		RLIMIT_RSS,	sizesuf },
+#endif
+#ifdef RLIMIT_MEMLOCK
 	{ "lockedmemory",	RLIMIT_MEMLOCK,	sizesuf },
+#endif
 	{ "descriptors",	RLIMIT_NOFILE,	NULL },
+#ifdef RLIMIT_NPROC
 	{ "processes",		RLIMIT_NPROC,	NULL },
+#endif
 	{ "virtualsize",	RLIMIT_AS,	sizesuf },
+#ifdef RLIMIT_MSGQUEUE
 	{ "msgqueuesize",	RLIMIT_MSGQUEUE, sizesuf },
+#endif
+#ifdef RLIMIT_NICE
 	{ "nicelimit",		RLIMIT_NICE,	NULL },
+#endif
+#ifdef RLIMIT_RTPRIO
 	{ "rtpriolimit",	RLIMIT_RTPRIO,	NULL },
+#endif
+#ifdef RLIMIT_RTTIME
 	{ "rtrunlimit",		RLIMIT_RTTIME,	NULL },
+#endif
+#ifdef RLIMIT_SIGPENDING
 	{ "sigqlimit",		RLIMIT_SIGPENDING, NULL },
+#endif
 	{ NULL, 0, NULL }
 };
 
