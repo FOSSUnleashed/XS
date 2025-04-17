@@ -3,10 +3,8 @@
 #include "xs.hxx"
 #include <sstream>
 #include <functional>
-#include <boost/lexical_cast.hpp>
-using std::binary_function;
-using boost::lexical_cast;
-
+#include <cmath>
+#include <climits>
 
 static List *calculate(Tree *, Binding *);
 
@@ -326,6 +324,10 @@ extern List* glom(Tree* tree, Binding* binding, bool globit) {
    converting to-and-from string representation.
  */
 
+static List *i64tolist(int64_t x) {
+	return mklist(mkstr(str("%lld", x)), NULL);
+}
+
 static List *tolist(int x) {
 	return mklist(mkstr(str("%d", x)), NULL);
 }
@@ -341,20 +343,27 @@ static bool isint(List *x) {
 
 
 static int toint(List *x) {
-	try {
-		return lexical_cast<int>(getstr(x->term));
-	} catch (const boost::bad_lexical_cast &) {
-		fail("glom:arith:toint",
-                     "Could not handle integer input");
+	errno = 0;
+	char *end = NULL;
+	long val = strtol(getstr(x->term), &end, 10);
+
+	if (EINVAL == errno || ERANGE == errno || NULL == end || *end) {
+		fail("glom:arith:toint", "Could not handle integer input");
 	}
+
+	return val;
 }
 static double todouble(List *x) {
-	try {
-		return lexical_cast<double>(getstr(x->term));
-	} catch (const boost::bad_lexical_cast &) {
-		fail("glom:arith:todouble",
-		     "Could not handle floating point input");
+	errno = 0;
+	char *end = NULL;
+
+	double val = strtod(getstr(x->term), &end);
+
+	if (EINVAL == errno || NULL == end || *end) {
+		fail("glom:arith:todouble", "Could not handle floating point input");
 	}
+
+	return val;
 }
 
 #define OP(f, x, y) op(f<int>(), f<double>(), x, y)
@@ -370,21 +379,31 @@ static List *op(ftint intf,
 
 /* calculate -- Take an arithmetic tree, produce result */
 static List *calculate(Tree *expr, Binding *binding) {
+	int64_t ival;
+	double dval;
+	char *end = NULL;
+
+	errno = 0;
+
 	switch (expr->kind) {
 	case nInt:
-		try {
-			return tolist(lexical_cast<int>(expr->u[0].s));
-		} catch (const boost::bad_lexical_cast &) {
-			fail("glom:arith:calculate",
-	                     "Could not handle integer input");
+		ival = strtoll(expr->u[0].s, &end, 10);
+
+		// TODO: officially support 64-bit ints
+
+		if (EINVAL == errno || ERANGE == errno || NULL == end || *end || (1 && (INT_MAX < ival || INT_MIN > ival))) {
+			fail("glom:arith:calculate", "Could not handle integer input");
 		}
+
+		return i64tolist(ival);
 	case nFloat:
-		try {
-			return tolist(lexical_cast<double>(expr->u[0].s));
-		} catch (const boost::bad_lexical_cast &) {
-			fail("glom:arith:calculate",
-	                     "Could not handle floating point input");
+		dval = strtod(expr->u[0].s, &end);
+
+		if (EINVAL == errno || NULL == end || *end) {
+			fail("glom:arith:calculate", "Could not handle floating point input");
 		}
+
+		return tolist(dval);
 	case nVar:
 		{
 		List *var = glom1(expr->u[0].p, binding);
@@ -406,16 +425,16 @@ static List *calculate(Tree *expr, Binding *binding) {
 		List *a = EXPR1, *b = EXPR2;
 		// Integer division by 0 causes issues
 		if (isint(b) and toint(b) == 0)
-			return tolist(std::numeric_limits<double>::infinity());
+			return tolist(INFINITY);
 		return OP(std::divides, a, b);
 		}
 	case nModulus:
 		{
 		List *a = EXPR1, *b = EXPR2;
 		if (isint(b) and toint(b) == 0)
-			return tolist(std::numeric_limits<double>::infinity());
+			return tolist(INFINITY);
 		if (not isint(b) and todouble(b) == 0.0)
-			return tolist(std::numeric_limits<double>::infinity());
+			return tolist(INFINITY);
 		double r = std::fmod(todouble(a), todouble(b));
 		if (isint(a) and isint(b)) return tolist(static_cast<int>(r));
 		else return tolist(r);

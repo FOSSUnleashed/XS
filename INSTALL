@@ -8,7 +8,6 @@ build system, Bison and the developer packages of the libraries noted
 above.
 
 Xs is known to build with these (minimum) library versions:
-   boost        1.60
    ffi          6.0.2
    gc           1.0.3
    readline     6.3
@@ -18,14 +17,9 @@ Installation
 
 To build and install xs using your default C++ compiler, do:
 
-   $ ./build.sh
-   $ ./build.sh check
-   $ sudo ./build.sh install
-
-You can also force the build to use either GCC or Clang as follows:
-
-   $ ./build.sh --clang
-   $ ./build.sh --gcc
+   $ make
+   $ make check
+   $ sudo make install
 
 Setting xs as your default shell
 --------------------------------

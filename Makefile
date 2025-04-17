@@ -3,7 +3,7 @@ gen_source = gen/initial.cxx gen/sigmsgs.cxx
 
 YACC = bison
 
-CXXFLAGS ?= -Wall -Wextra
+CXXFLAGS ?= -Wall -Wextra -g
 
 INCLUDE = -Isrc -Igen
 LIBS = -lgc -lgccpp -lreadline -lffi
@@ -11,8 +11,11 @@ SOURCES = src/access.cxx src/closure.cxx src/conv.cxx src/eval.cxx src/fd.cxx sr
 OBJECTS = $(patsubst src/%.cxx,build/%.o,$(SOURCES))
 ALL_OBJECTS = $(OBJECTS) build/sigmsgs.o build/parse.o
 
-.PHONY: clean all
+.PHONY: clean all check
 all: build/xs
+
+check: build/xs
+	./build/xs tests/xs_tests.xs
 
 clean:
 	rm -rf build gen

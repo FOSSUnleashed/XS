@@ -9,10 +9,7 @@ using std::map;
 #include <gc/gc_cpp.h>
 #include <gc/gc_allocator.h>
 
-#include <boost/foreach.hpp>
-#define foreach BOOST_FOREACH
-
-# include <sys/cdefs.h>
+#define foreach(it, cont) for (it : cont)
 
 /*
  * type qualifiers
