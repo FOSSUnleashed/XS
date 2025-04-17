@@ -524,7 +524,6 @@ extern Tree *parse(const char *pr1, const char *pr2) {
 
 	int result = yyparse();
 
-
 	if (result || error != NULL) {
 		assert(error != NULL);
 		const char *e = error;
@@ -574,7 +573,7 @@ extern const List *runinput(Input *in, int runflags) {
 				? prim("batchloop", NULL, NULL, flags)
 				: eval(repl, NULL, flags);
 	} catch (List *e) {
-		input = input->prev;
+		input = input->prev; // input is a global
 		throw e;
 	}
 

@@ -414,7 +414,7 @@ static List *calculate(Tree *expr, Binding *binding) {
 		}
 #define EXPR1 calculate(expr->u[0].p, binding)
 #define EXPR2 calculate(expr->u[1].p, binding)
-	case nPlus:
+	case nPlus: // NOTE: std::plus<int>(EXPR1, EXPR2) || std::plus<double>(EXPR1, EXPR2)
 		return OP(std::plus, EXPR1, EXPR2);
 	case nMinus:
 		return OP(std::minus, EXPR1, EXPR2);

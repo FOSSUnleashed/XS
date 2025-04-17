@@ -17,6 +17,7 @@ Non-FFI printf
 Remove boost.  foreach(iteratordef, list)
 XS as an embeddable scripting lang
 setsid?
+Primitive to get screen size
 
 
 64bit integer types

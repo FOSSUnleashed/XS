@@ -44,8 +44,10 @@ static void failexec(const char* file, const List* args) {
 
 /* forkexec -- fork (if necessary) and exec */
 extern List *forkexec(const char *file, const List *list, bool inchild) {
-	Vector *env = mkenv(),
-		   *args = vectorize(list);
+	Vector *env = mkenv();
+	Vector *args = vectorize(list);
+//	char **args;
+
 	int pid = efork(!inchild, false);
 	if (pid == 0) {
 		execve(file, &(*args)[0], &(*env)[0]);

@@ -52,6 +52,7 @@ enum NodeKind {
 	nRedir, nPipe		/* only appear during construction */
 };
 
+// u[?].i is the process id of both sides of a pipe
 struct Tree {
 	NodeKind kind;
 	union {

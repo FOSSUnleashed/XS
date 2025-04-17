@@ -87,11 +87,9 @@ extern void setnoexport(List *list) {
 
 /* varlookup -- lookup a variable in the current context */
 extern List *varlookup(const char* name, Binding* bp) {
-	if (iscounting(name)) {
+	if (iscounting(name)) { // This is to handle $1 $2 $3 ... etc variables
 		Term* term = nth(varlookup("*", bp), strtol(name, NULL, 10));
-                return term == NULL
-                    ? NULL
-                    : mklist(term, NULL);
+		return term == NULL ? NULL : mklist(term, NULL);
 	}
 
 	validatevar(name);

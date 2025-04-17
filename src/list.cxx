@@ -80,26 +80,45 @@ extern Term *nth(List *list, int n) {
 	return NULL;
 }
 
-static List *listify(Vector* v) {
-	List* list = NULL;
-	for (Vector::reverse_iterator i = v->rbegin();
-		i != v->rend();
-		++i)
-			list = mklist(mkstr(*i), list);
-	return list;
+static List* clonelistnode(List *list) {
+	if (NULL == list) {
+		return NULL;
+	}
+
+	return mklist(mkstr(gcdup(getstr(list->term))), NULL);
+}
+
+List *sortinsertlist(List *head, List *item) {
+	if (0 < strcmp(getstr(head->term), getstr(item->term))) {
+		item->next = head;
+		head = item;
+	} else if (NULL == head->next) {
+		head->next = item;
+	} else {
+		head->next = sortinsertlist(head->next, item);
+	}
+
+	return head;
 }
 
 /* sortlist */
 extern List* sortlist(List* list) {
-	Vector* v = vectorize(list);
-        v->sort();
-	return listify(v);
+	// strcmp(s1, s2) < 0
+	List *result = clonelistnode(list);
+	list = list->next;
+
+	iterate(list) {
+		result = sortinsertlist(result, clonelistnode(list));
+	}
+
+	return result;
 }
 
 extern Vector* vectorize(const List* list) {
-	Vector* v = new (UseGC) Vector;
-	iterate (list)
-		v->push_back(gcdup(getstr(list->term)));
+       Vector* v = new (UseGC) Vector;
+       iterate (list) {
+               v->push_back(gcdup(getstr(list->term)));
+       }
 
-	return v;
+       return v;
 }
