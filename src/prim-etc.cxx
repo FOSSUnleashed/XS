@@ -64,7 +64,7 @@ PRIM(printf) {
 		void *values[printf_max_varargs];
 		long longs[printf_max_varargs];
 		double doubles[printf_max_varargs];
-		char chars[printf_max_varargs];
+		char chars[printf_max_varargs * 2], *charp[printf_max_varargs];
 		const char* strings[printf_max_varargs];
 		ffi_arg rc;
 		const char *fmt = getstr(list->term);
@@ -117,9 +117,12 @@ PRIM(printf) {
 					fail("$&printf",
                                              "%%c: character"
 					     " value required");
-				args[i] = &ffi_type_schar;
-				chars[i] = *arg;
-				values[i] = &chars[i];
+				*fcp = 's';
+				args[i] = &ffi_type_pointer;
+				chars[i * 2] = *arg;
+				chars[i * 2 + 1] = 0;
+				charp[i] = chars + (i * 2);
+				values[i] = &charp[i];
 			} else {
 				if (!stringconv(*fcp))
 					fail("$&printf",
@@ -143,8 +146,9 @@ PRIM(printf) {
 					  "more fmts than args");
 			}
 		} while (fcp);
-		if (ffi_prep_cif_var(&cif, FFI_DEFAULT_ABI, 3, i,
-                                     &ffi_type_sint, args) == FFI_OK) {
+		ffi_status frc;
+		if ((frc = ffi_prep_cif_var(&cif, FFI_DEFAULT_ABI, 3, i,
+                                     &ffi_type_sint, args)) == FFI_OK) {
 			ffi_call(&cif, FFI_FN(snprintf), &rc, values);
 			if ((unsigned long)rc >= outsz)
                                 fail("$&printf", "output too long");
