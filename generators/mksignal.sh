@@ -2,6 +2,19 @@
 
 # generate xs's internal signal table from signal.h
 
+if type cpp 2>/dev/null ; then
+	:
+else
+	if type clang-cpp 2>/dev/null; then
+		cpp() {
+			clang-cpp $*
+		}
+	else
+		echo >&2 Could not find cpp
+		exit 1
+	fi
+fi
+
 INCS=$(echo "#include <signal.h>" | cpp | grep include |
 	sed 's/^[^"]*"//' | sed 's/".*$//' | sort | uniq)
 
