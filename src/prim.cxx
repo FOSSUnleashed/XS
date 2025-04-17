@@ -4,7 +4,6 @@
 #include "prim.hxx"
 
 static Prim_dict prims;
-#include <iostream>
 
 extern const List* 
     prim(const char *s, List* list, Binding* binding, int evalflags) {

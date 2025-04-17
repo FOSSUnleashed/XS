@@ -1,4 +1,13 @@
+xs 1.3.1 to 1.3.2
+-----------------
+
+Variable assignment with the exitonfalse flag no longer triggers an exit.  Solution is suboptimal, variable assignment returns true.
+Fix bug in printf where %c would prevent the entire output from occuring
+Remove boost dependency
+Fix compilation issues on IllumOS
+
 xs 1.3 to xs 1.3.1
+------------------
 
 Enable proper behavior when used in shebang scripts
 

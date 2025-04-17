@@ -11,8 +11,15 @@ Modify variable meta-data (exportable, type, etc)
 Scope/context type variables
 
 Not necessarily a TODO, but the @ command in rc is used to make a subshell.  This is slightly different than fork or %background.
-Possible idea?  Make it a co-routine operator?
+	Possible idea?  Make it a co-routine operator?
 Better <= operator.  Maybe :
 Non-FFI printf
 Remove boost.  foreach(iteratordef, list)
 XS as an embeddable scripting lang
+setsid?
+
+
+64bit integer types
+Unary - in `(MATH)
+Better `(MATH) overall
+$#VAR in `(MATH)

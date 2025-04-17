@@ -4,7 +4,6 @@
 
 #include "stdenv.hxx"
 #include <algorithm>
-#include <functional>
 #include <string>
 
 #define iterate(list) for (; list != NULL; list = list->next)
