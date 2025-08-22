@@ -5,6 +5,7 @@
 #include <functional>
 #include <cmath>
 #include <climits>
+#include <cstdint>
 
 static List *calculate(Tree *, Binding *);
 
