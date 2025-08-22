@@ -16,7 +16,8 @@ LDFLAGS = -static
 all: build/xs build/xsfat
 
 check: build/xs
-	./build/xs tests/xs_tests.xs
+	TRG=xs ./build/xs tests/xs_tests.xs
+	TRG=xsfat ./build/xsfat tests/xs_tests.xs
 
 clean:
 	rm -rf build gen

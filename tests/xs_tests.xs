@@ -1,7 +1,8 @@
 #! ./build/xs
 PGM = $0
 HERE = `pwd^/`{dirname $PGM}
-XS = $HERE/../build/xs -p
+if {~ $TRG} TRG = xs
+XS = $HERE/../build/^$TRG -p
 VERBOSE = false
 FORK = true
 PLATFORM = `{uname -m}
@@ -88,7 +89,7 @@ fn match-re { |result|
     log2 Match_re....
     eval '~ `` '''' output *'^$^result^'*'
 }
-let (logfile = `pwd^/tests/xs_tests.log)
+let (logfile = `pwd^/tests/xs_tests.^$TRG^.log)
 {
     echo $HERE
     fn log { |msg|
