@@ -34,8 +34,16 @@ let (TMPOUT = /dev/shm/xs.$pid.testout) {
 }
 
 let (passes = 0
-     fails  = 0)
+     fails  = 0
+	c_clear = \x1b[0m
+	c_green = \x1b[32m
+	c_red = \x1b[34m)
 {
+	if {~ $TERM dumb} {
+		c_clear =
+		c_green = 
+		c_red = 
+	}
     fn pass { 
 	passes = `{expr 1 + $passes}
         log 'Passed: ' $TESTNAME
@@ -45,8 +53,8 @@ let (passes = 0
 	log 'Failed: ' $TESTNAME
     }
     fn results {
-	log 'Expected passes:     ' $passes
-	log 'Unexpected failures: ' $fails
+	log 'Expected passes:    ' $c_green $passes $c_clear
+	log 'Unexpected failures:' $c_red $fails $c_clear
     	rm -r /dev/shm/xs.*
 	exit $fails
     }
