@@ -97,7 +97,7 @@ fn-nth = {|num args|
 	}
 }
 
-fn %in-path {|cmd|
+fn-%in-path = {|cmd|
 	map {|f| if {access -x $f} {result $f} else result} $path^/^$cmd
 }
 

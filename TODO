@@ -24,3 +24,5 @@ Primitive to get screen size
 Unary - in `(MATH)
 Better `(MATH) overall
 $#VAR in `(MATH)
+thing && { ... } # cause mk builds to fail
+sleep sometimes ends early
