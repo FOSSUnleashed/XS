@@ -2,7 +2,7 @@ fn cpu {|host frag vars|
 	if {~ $frag} {
 		ssh -t $host rcxs
 	} else {
-		{ var $vars; echo $frag } | ssh $host rcxs
+		result <={nth -1 <={{ var $vars; echo $frag } | ssh $host rcxs}}
 	}
 }
 
