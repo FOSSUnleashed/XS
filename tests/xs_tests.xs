@@ -1,7 +1,7 @@
 #! ./build/xs
 PGM = $0
 HERE = `pwd^/`{dirname $PGM}
-if {~ $TRG} TRG = xs
+if {~ $TRG} { TRG = xs }
 XS = $HERE/../build/^$TRG -p
 VERBOSE = false
 FORK = true
