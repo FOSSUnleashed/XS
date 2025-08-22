@@ -6,14 +6,14 @@ YACC = bison
 CXXFLAGS ?= -Wall -Wextra -g
 
 INCLUDE = -Isrc -Igen
-LIBS = -lgc -lgccpp -lreadline -lffi
+LIBS = -lgc -lgccpp -lreadline -lffi -lncursesw
 SOURCES = src/access.cxx src/closure.cxx src/conv.cxx src/eval.cxx src/fd.cxx src/glob.cxx src/glom.cxx src/heredoc.cxx src/input.cxx src/list.cxx src/main.cxx src/match.cxx src/opt.cxx src/prim-ctl.cxx src/prim.cxx src/prim-etc.cxx src/prim-io.cxx src/prim-rel.cxx src/prim-sys.cxx src/print.cxx src/proc.cxx src/signal.cxx src/split.cxx src/status.cxx src/str.cxx src/syntax.cxx src/term.cxx src/token.cxx src/tree.cxx src/util.cxx src/var.cxx src/version.cxx src/buildinfo.cxx
 OBJECTS = $(patsubst src/%.cxx,build/%.o,$(SOURCES))
 ALL_OBJECTS = $(OBJECTS) build/sigmsgs.o build/parse.o
 LDFLAGS = -static
 
 .PHONY: clean all check
-all: build/xs
+all: build/xs build/xsfat
 
 check: build/xs
 	./build/xs tests/xs_tests.xs
@@ -43,6 +43,9 @@ build/xsdump: src/dump.cxx $(ALL_OBJECTS) | build/
 build/xs: gen/initial.cxx $(ALL_OBJECTS) | build/
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) $^ -o $@ $(LIBS)
 
+build/xsfat: gen/fat.init.cxx $(ALL_OBJECTS) | build/
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) $^ -o $@ $(LIBS)
+
 gen/parse.tab.cxx: src/parse.yxx | gen/
 	$(YACC) -d -o gen/parse.tab.cxx $<
 
@@ -62,6 +65,9 @@ gen/git_url.hxx: | gen/
 
 gen/sigmsgs.cxx: | gen/
 	cd gen && sh ../generators/mksignal.sh sigmsgs.cxx
+
+gen/%.cxx: src/%.xs src/initial.xs build/xsdump | gen/
+	cat $< src/initial.xs | ./build/xsdump >$@
 
 gen/initial.cxx: src/initial.xs build/xsdump | gen/
 	./build/xsdump <$< >$@
