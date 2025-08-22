@@ -10,6 +10,7 @@ LIBS = -lgc -lgccpp -lreadline -lffi
 SOURCES = src/access.cxx src/closure.cxx src/conv.cxx src/eval.cxx src/fd.cxx src/glob.cxx src/glom.cxx src/heredoc.cxx src/input.cxx src/list.cxx src/main.cxx src/match.cxx src/opt.cxx src/prim-ctl.cxx src/prim.cxx src/prim-etc.cxx src/prim-io.cxx src/prim-rel.cxx src/prim-sys.cxx src/print.cxx src/proc.cxx src/signal.cxx src/split.cxx src/status.cxx src/str.cxx src/syntax.cxx src/term.cxx src/token.cxx src/tree.cxx src/util.cxx src/var.cxx src/version.cxx src/buildinfo.cxx
 OBJECTS = $(patsubst src/%.cxx,build/%.o,$(SOURCES))
 ALL_OBJECTS = $(OBJECTS) build/sigmsgs.o build/parse.o
+LDFLAGS = -static
 
 .PHONY: clean all check
 all: build/xs
@@ -37,10 +38,10 @@ build/parse.o: gen/parse.tab.cxx | build/
 	$(CXX) -c $(CXXFLAGS) $(INCLUDE) $< -o $@
 
 build/xsdump: src/dump.cxx $(ALL_OBJECTS) | build/
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) $(LIBS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) $^ -o $@ $(LIBS)
 
 build/xs: gen/initial.cxx $(ALL_OBJECTS) | build/
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) $(LIBS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) $^ -o $@ $(LIBS)
 
 gen/parse.tab.cxx: src/parse.yxx | gen/
 	$(YACC) -d -o gen/parse.tab.cxx $<
