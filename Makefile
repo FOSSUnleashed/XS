@@ -68,7 +68,7 @@ gen/sigmsgs.cxx: | gen/
 	cd gen && sh ../generators/mksignal.sh sigmsgs.cxx
 
 gen/%.cxx: src/%.xs src/initial.xs build/xsdump | gen/
-	cat src/initial.xs $< | ./build/xsdump >$@
+	(head -n-1 src/initial.xs; cat $<) | ./build/xsdump >$@
 
 gen/initial.cxx: src/initial.xs build/xsdump | gen/
 	./build/xsdump <$< >$@
