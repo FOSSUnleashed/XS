@@ -97,6 +97,10 @@ fn-nth = {|num args|
 	}
 }
 
+fn %in-path {|cmd|
+	map {|f| if {access -x $f} {result $f} else result} $path^/^$cmd
+}
+
 
 #	These functions just generate exceptions for control-flow
 #	constructions. 

@@ -6,10 +6,6 @@ fn cpu {|host frag vars|
 	}
 }
 
-fn %in-path {|cmd|
-	map {|f| if {access -x $f} {result $f} else result} $path^/^$cmd
-}
-
 fn us {|user frag vars|
 	if {!~ $user} {
 		user = -u $user
