@@ -83,6 +83,14 @@ fn-eval = { |body| '{' ^ $^body ^ '}' }
 fn-true		= result 0
 fn-false	= result 1
 
+fn-nth = {|num args|
+	# Check if index is valid
+	if {$#args :lt $num || $num :lt 1} {
+		result
+	} else {
+		result $args($num)
+	}
+}
 
 
 #	These functions just generate exceptions for control-flow
