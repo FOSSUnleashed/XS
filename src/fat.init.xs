@@ -6,14 +6,6 @@ fn cpu {|host frag vars|
 	}
 }
 
-fn xsroot {|frag vars|
-	if {~ $frag} {
-		sudo rcxs
-	} else {
-		{ var $vars; echo $frag } | sudo rcxs
-	}
-}
-
 fn %in-path {|cmd|
 	map {|f| if {access -x $f} {result $f} else result} $path^/^$cmd
 }
@@ -28,7 +20,7 @@ fn us {|user frag vars|
 	if {~ $frag} {
 		sudo $user rcxs
 	} else {
-		{ var $vars; echo $frag } | sudo $user rcxs
+		result <={nth -1 <={{ var $vars; echo $frag } | sudo $user rcxs}}
 	}
 }
 

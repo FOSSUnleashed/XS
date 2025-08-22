@@ -85,7 +85,12 @@ fn-false	= result 1
 
 fn-nth = {|num args|
 	# Check if index is valid
-	if {$#args :lt $num || $num :lt 1} {
+	if {$num :lt 0 && `(0 - $num) :lt $#args} {
+		let (x = $#args) {
+			x = `($x + $num + 1)
+			result $args($x)
+		}
+	} else if {$#args :lt $num || $num :eq 0} {
 		result
 	} else {
 		result $args($num)
