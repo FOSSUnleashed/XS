@@ -6,7 +6,13 @@ fn cpu {|host frag vars|
 	}
 }
 
-fn x {echo From fat}
+fn xsroot {|frag vars|
+	if {~ $frag} {
+		sudo rcxs
+	} else {
+		{ var $vars; echo $frag } | sudo rcxs
+	}
+}
 
 result xs initial state built in `/bin/pwd on `/bin/date for <=$&version
 
